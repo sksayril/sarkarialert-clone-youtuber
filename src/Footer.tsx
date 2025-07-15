@@ -1,7 +1,7 @@
 export default function Footer() {
   return (
     <footer className="bg-[#292a2b] text-white w-full mt-12">
-      <div className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-4 gap-8">
         {/* Address */}
         <div>
           <div className="text-3xl font-bold mb-2">Sarkari Alert</div>

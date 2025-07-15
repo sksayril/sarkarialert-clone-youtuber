@@ -44,38 +44,36 @@ export default function TopDataSection() {
   if (error) return <div className="text-center text-red-600 mt-4">{error}</div>;
 
   return (
-    <div className="w-full flex flex-wrap gap-2 justify-center items-center mb-4">
-      {topData.map(item => (
-        <button
-          key={item._id}
-          onClick={() => navigate(`/topdata/${slugify(item.contentTitle)}`)}
-          className="flex items-center justify-center rounded-sm font-bold text-white text-center"
-          style={{
-            backgroundColor: item.colorCode,
-            minWidth: 320,
-            maxWidth: 420,
-            width: '100%',
-            height: 80,
-            fontSize: 22,
-            padding: '0 12px',
-            marginBottom: 0,
-            marginTop: 0,
-            marginLeft: 0,
-            marginRight: 0,
-            whiteSpace: 'normal',
-            lineHeight: 1.2,
-            boxSizing: 'border-box',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            textAlign: 'center',
-            cursor: 'pointer',
-            border: 'none',
-          }}
-        >
-          {item.contentTitle}
-        </button>
-      ))}
+    <div className="w-full max-w-6xl mx-auto px-4 mb-6">
+      <div className="grid grid-cols-4 gap-2">
+        {topData.slice(0, 8).map((item, index) => (
+          <button
+            key={item._id}
+            onClick={() => navigate(`/topdata/${slugify(item.contentTitle)}`)}
+            className="flex items-center justify-center rounded-none font-bold text-white text-center border border-white"
+            style={{
+              backgroundColor: item.colorCode,
+              height: 80,
+              fontSize: 16,
+              padding: '8px 12px',
+              whiteSpace: 'normal',
+              lineHeight: 1.2,
+              boxSizing: 'border-box',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              cursor: 'pointer',
+              border: '1px solid white',
+              minHeight: '80px',
+              wordWrap: 'break-word',
+              overflow: 'hidden'
+            }}
+          >
+            {item.contentTitle}
+          </button>
+        ))}
+      </div>
     </div>
   );
 } 

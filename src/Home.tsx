@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import HomeFaqs from "./HomeFaqs";
+import SaleOfferPopup from "./SaleOfferPopup";
+// import HomeFaqs from "./HomeFaqs";
 
 interface MainCategory {
   _id: string;
@@ -32,6 +33,7 @@ export default function Home() {
   const [categories, setCategories] = useState<Record<string, SubCategory[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showSalePopup, setShowSalePopup] = useState(false);
 
   useEffect(() => {
     fetch("https://7cvccltb-3110.inc1.devtunnels.ms/category/sub")
@@ -52,12 +54,25 @@ export default function Home() {
       });
   }, []);
 
+  // Show popup after 3 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSalePopup(true);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleCloseSalePopup = () => {
+    setShowSalePopup(false);
+  };
+
   if (loading) return <div className="text-center mt-10">Loading...</div>;
   if (error) return <div className="text-center text-red-600 mt-10">{error}</div>;
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4">
+      <div className="grid grid-cols-3 gap-6 p-4">
         {Object.entries(categories).map(([main, subs]) => (
           <div key={main} className="border-2 border-red-700 rounded-lg bg-white">
             <h2 className="bg-red-700 text-white text-2xl font-bold text-center py-3 mb-2 rounded-t-lg">{main}</h2>
@@ -78,7 +93,14 @@ export default function Home() {
           </div>
         ))}
       </div>
-      <HomeFaqs />
+      
+      {/* Sale Offer Popup */}
+      <SaleOfferPopup 
+        isOpen={showSalePopup} 
+        onClose={handleCloseSalePopup} 
+      />
+      
+      {/* <HomeFaqs /> */}
     </>
   );
 } 

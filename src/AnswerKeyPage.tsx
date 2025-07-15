@@ -1,29 +1,29 @@
 import React, { useEffect, useState } from "react";
 
-interface ResultItem {
+interface AnswerKeyItem {
   _id: string;
   contentTitle: string;
   contentDescription: string;
 }
 
-const ResultsPage: React.FC = () => {
-  const [items, setItems] = useState<ResultItem[]>([]);
+const AnswerKeyPage: React.FC = () => {
+  const [items, setItems] = useState<AnswerKeyItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("https://7cvccltb-3110.inc1.devtunnels.ms/latest-jobs/public/results")
+    fetch("https://7cvccltb-3110.inc1.devtunnels.ms/latest-jobs/public/AnswerKey")
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
           setItems(data.data);
         } else {
-          setError("No results data found");
+          setError("No answer key data found");
         }
         setLoading(false);
       })
       .catch(() => {
-        setError("Failed to fetch results data");
+        setError("Failed to fetch answer key data");
         setLoading(false);
       });
   }, []);
@@ -33,7 +33,7 @@ const ResultsPage: React.FC = () => {
 
   return (
     <div className="max-w-2xl mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-6 text-center">Results</h1>
+      <h1 className="text-2xl font-bold mb-6 text-center">Answer Key</h1>
       <ul className="space-y-6">
         {items.map((item) => (
           <li key={item._id} className="bg-white rounded shadow p-4">
@@ -46,4 +46,4 @@ const ResultsPage: React.FC = () => {
   );
 };
 
-export default ResultsPage; 
+export default AnswerKeyPage; 
