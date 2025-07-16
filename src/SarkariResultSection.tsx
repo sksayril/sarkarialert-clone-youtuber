@@ -1,70 +1,78 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { Link } from "react-router-dom";
 
-interface TopData {
-  _id: string;
-  contentTitle: string;
-  colorCode: string;
-}
+const SarkariResultSection: React.FC = () => {
+  const quickActions = [
+    { name: "Latest Jobs", icon: "🔴", color: "bg-red-600", href: "#" },
+    { name: "Results", icon: "🟢", color: "bg-green-600", href: "/results" },
+    { name: "Admit Card", icon: "🔵", color: "bg-blue-600", href: "/admitcard" },
+    { name: "Answer Key", icon: "🟡", color: "bg-yellow-500", href: "/answerkey" },
+    { name: "Syllabus", icon: "🟣", color: "bg-purple-600", href: "/syllabus" },
+    { name: "Admission", icon: "🌸", color: "bg-pink-500", href: "/admission" },
+    { name: "Important", icon: "🔷", color: "bg-indigo-600", href: "/important" },
+    { name: "Contact", icon: "✳️", color: "bg-teal-500", href: "#" },
+  ];
 
-export default function SarkariResultSection() {
-  const [topData, setTopData] = useState<TopData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetch("https://7cvccltb-3110.inc1.devtunnels.ms/category/topdata")
-      .then(res => res.json())
-      .then(data => {
-        setTopData(data.topDataList || []);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError("API se data fetch nahi ho paaya.");
-        setLoading(false);
-      });
-  }, []);
-
-  if (loading) return <div className="text-center py-4">Loading...</div>;
-  if (error) return <div className="text-center text-red-600 py-4">{error}</div>;
-
-  // Group data into rows of 4 items each
-  const rows = [];
-  for (let i = 0; i < topData.length; i += 4) {
-    rows.push(topData.slice(i, i + 4));
-  }
+  const trendingTopics = [
+    { name: "UP Police Constable", icon: "👮", color: "bg-blue-600", href: "#" },
+    { name: "Railway Group D", icon: "🚂", color: "bg-green-600", href: "#" },
+    { name: "Bihar Teacher", icon: "📚", color: "bg-purple-600", href: "#" },
+    { name: "Anganwadi Bharti", icon: "🏠", color: "bg-pink-500", href: "#" },
+    { name: "Bank Clerk", icon: "🏦", color: "bg-indigo-600", href: "#" },
+  ];
 
   return (
-    <div className="w-full bg-white">
-      <div className="max-w-4xl mx-auto">
-        {/* Top Section - Text Links */}
-        <div className="space-y-1 mb-6">
-          {rows.map((row, rowIndex) => (
-            <div key={rowIndex} className="text-center">
-              {row.map((item, itemIndex) => (
-                <React.Fragment key={item._id}>
-                  <a 
-                    href="#" 
-                    className="text-blue-800 underline hover:text-blue-900 font-medium"
-                    style={{ color: '#0000FF' }}
-                  >
-                    {item.contentTitle}
-                  </a>
-                  {itemIndex < row.length - 1 && (
-                    <span className="text-blue-800 mx-3 font-medium">||</span>
-                  )}
-                </React.Fragment>
-              ))}
-            </div>
-          ))}
-        </div>
-        
-        {/* Bottom Section - Facebook Button */}
-        <div className="text-center">
-          <button className="bg-blue-800 text-white px-5 rounded-md font-bold text-lg hover:bg-blue-900 transition-colors">
-            Join us on <span className="underline">Facebook</span>
-          </button>
-        </div>
+    <div className="py-4">
+      {/* Quick Actions */}
+      <div className="grid grid-cols-4 gap-4 mb-6">
+        {quickActions.map((action) => (
+          <Link
+            key={action.name}
+            to={action.href}
+            className={`flex items-center justify-center text-white font-bold px-6 py-4 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 min-h-[80px] ${action.color}`}
+          >
+            <span className="mr-3 text-2xl">
+              {action.icon}
+            </span>
+            <span className="text-base leading-tight font-semibold">
+              {action.name}
+            </span>
+          </Link>
+        ))}
+      </div>
+
+      {/* Trending Topics */}
+      <div className="grid grid-cols-5 gap-4 mb-6">
+        {trendingTopics.map((topic) => (
+          <Link
+            key={topic.name}
+            to={topic.href}
+            className={`flex items-center justify-center text-white font-bold px-6 py-4 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 min-h-[80px] ${topic.color}`}
+          >
+            <span className="mr-3 text-2xl">
+              {topic.icon}
+            </span>
+            <span className="text-base leading-tight font-semibold">
+              {topic.name}
+            </span>
+          </Link>
+        ))}
+      </div>
+
+      {/* WhatsApp Join Button */}
+      <div className="text-center">
+        <a
+          href="https://wa.me/1234567890"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center justify-center bg-green-500 text-white font-bold px-8 py-4 rounded-2xl shadow-lg hover:bg-green-600 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 min-h-[80px]"
+        >
+          <span className="text-2xl mr-3">📱</span>
+          <span className="text-lg">Join us on WhatsApp</span>
+        </a>
       </div>
     </div>
   );
-} 
+};
+
+export default SarkariResultSection; 

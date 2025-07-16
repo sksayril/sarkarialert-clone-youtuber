@@ -5,15 +5,21 @@
 }
 
 body {
-  font-family: 'Arial', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  font-family: 'Segoe UI', 'Arial', 'Helvetica Neue', Arial, Helvetica, sans-serif;
   background: #f9f9f9;
   color: #2c2c2c;
-  min-width: 1200px; /* Force minimum width to prevent mobile layout */
+  min-width: 1200px;
+  font-size: 18px; /* Increased base font size */
+  line-height: 1.6; /* Better line height for readability */
+  font-weight: 400; /* Clearer font weight */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 /* Disable responsive behavior */
 html {
-  font-size: 16px !important;
+  font-size: 18px !important; /* Increased from 16px */
 }
 
 /* Force desktop layout on all devices */
@@ -22,6 +28,114 @@ html {
     min-width: 1200px;
     overflow-x: auto;
   }
+}
+
+/* Mobile-specific enhancements */
+@media (max-width: 768px) {
+  body {
+    font-size: 20px !important; /* Even larger for mobile */
+    line-height: 1.7;
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  
+  /* Prevent zoom on input focus */
+  input, textarea, select {
+    font-size: 18px !important;
+  }
+  
+  /* Better touch targets */
+  button, a {
+    min-height: 48px;
+    min-width: 48px;
+  }
+  
+  /* Enhanced readability */
+  p, span, div {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    font-weight: 500; /* Slightly bolder for mobile */
+  }
+  
+  /* Larger navigation on mobile */
+  nav a {
+    font-size: 1.2rem !important;
+    padding: 14px 18px !important;
+    font-weight: 600;
+  }
+  
+  /* Better button spacing */
+  .grid {
+    gap: 1.5rem !important;
+  }
+  
+  /* Enhanced contrast for mobile */
+  .text-gray-800 {
+    color: #1a1a1a !important;
+  }
+  
+  .text-gray-600 {
+    color: #374151 !important;
+  }
+  
+  /* Larger headings on mobile */
+  h1 {
+    font-size: 2.5rem !important;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  
+  h2 {
+    font-size: 2rem !important;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  
+  h3 {
+    font-size: 1.5rem !important;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  
+  /* Enhanced text sizes for mobile */
+  .text-sm { font-size: 1.1rem !important; }
+  .text-base { font-size: 1.25rem !important; }
+  .text-lg { font-size: 1.4rem !important; }
+  .text-xl { font-size: 1.6rem !important; }
+  .text-2xl { font-size: 1.9rem !important; }
+  .text-3xl { font-size: 2.3rem !important; }
+  .text-4xl { font-size: 2.8rem !important; }
+  .text-5xl { font-size: 3.2rem !important; }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  body {
+    font-size: 22px !important;
+    line-height: 1.8;
+  }
+  
+  /* Even larger touch targets */
+  button, a {
+    min-height: 52px;
+    min-width: 52px;
+  }
+  
+  /* Larger navigation */
+  nav a {
+    font-size: 1.3rem !important;
+    padding: 16px 20px !important;
+  }
+  
+  /* Enhanced text sizes for very small screens */
+  .text-sm { font-size: 1.2rem !important; }
+  .text-base { font-size: 1.35rem !important; }
+  .text-lg { font-size: 1.5rem !important; }
+  .text-xl { font-size: 1.7rem !important; }
+  .text-2xl { font-size: 2rem !important; }
+  .text-3xl { font-size: 2.4rem !important; }
 }
 
 :root {
@@ -36,6 +150,110 @@ html {
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Enhanced Typography Classes */
+.text-xl {
+  font-size: 1.25rem !important; /* 20px */
+  line-height: 1.5;
+}
+
+.text-2xl {
+  font-size: 1.5rem !important; /* 24px */
+  line-height: 1.4;
+}
+
+.text-3xl {
+  font-size: 1.875rem !important; /* 30px */
+  line-height: 1.3;
+}
+
+.text-4xl {
+  font-size: 2.25rem !important; /* 36px */
+  line-height: 1.2;
+}
+
+.text-5xl {
+  font-size: 3rem !important; /* 48px */
+  line-height: 1.1;
+}
+
+/* Enhanced Link Styles */
+a {
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Enhanced Button Text */
+button {
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+/* Enhanced Form Elements */
+input, textarea, select {
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+/* Enhanced Navigation */
+nav a {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* Enhanced Headers */
+h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+h4 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  * {
+    border-color: currentColor !important;
+  }
+  
+  .text-gray-800 {
+    color: #000 !important;
+  }
+  
+  .text-gray-600 {
+    color: #333 !important;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 
 /* Ultra Premium AI Chat Animations */
 @keyframes fadeIn {

@@ -1,4 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Mic, MicOff, Send, Volume2 } from "lucide-react"; // Add Volume2 import
+
+// Add TypeScript declarations for Web Speech API
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+  }
+}
 
 interface Message {
   id: string;
@@ -36,11 +45,116 @@ const AiChat: React.FC = () => {
   ]);
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [isListening, setIsListening] = useState(false); // NEW: Voice listening state
+  const [isSpeaking, setIsSpeaking] = useState(false); // NEW: Voice speaking state
+  const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null); // NEW: Track which message is speaking
+  const [indianFemaleVoice, setIndianFemaleVoice] = useState<SpeechSynthesisVoice | null>(null); // NEW: Voice state
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null); // NEW: Speech recognition ref
 
   const GEMINI_API_KEY = "AIzaSyDOIvVe16RTrp_lYsE9WwS7WIJsOFiu4RA";
   const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
   const SYSTEM_PROMPT_URL = "https://7cvccltb-3110.inc1.devtunnels.ms/admin/users/system-prompt";
+
+  // NEW: Voice synthesis function
+  const speak = (text: string, messageId?: string) => {
+    if (!text || typeof window.speechSynthesis === 'undefined') {
+      console.error("Speech synthesis not supported or no text provided.");
+      return;
+    }
+    
+    const getBestVoice = () => {
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length === 0) return null;
+      let bestVoice = voices.find(voice => voice.lang === 'hi-IN' && voice.name.includes('Google'));
+      if (bestVoice) return bestVoice;
+      return voices.find(voice => voice.lang === 'hi-IN') || null;
+    };
+    
+    let voiceToUse = indianFemaleVoice;
+    if (!voiceToUse) {
+      voiceToUse = getBestVoice();
+      setIndianFemaleVoice(voiceToUse);
+    }
+    
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    if (voiceToUse) {
+      utterance.voice = voiceToUse;
+    }
+    utterance.lang = 'hi-IN';
+    utterance.pitch = 1.0;
+    utterance.rate = 0.95;
+    utterance.onstart = () => {
+      setIsSpeaking(true);
+      if (messageId) setSpeakingMessageId(messageId);
+    };
+    utterance.onend = () => {
+      setIsSpeaking(false);
+      setSpeakingMessageId(null);
+    };
+    utterance.onerror = (e) => {
+      console.error("An error occurred during speech synthesis:", e);
+      setIsSpeaking(false);
+      setSpeakingMessageId(null);
+    };
+    window.speechSynthesis.speak(utterance);
+  };
+
+  // NEW: Handle speak button click for specific message
+  const handleSpeakMessage = (messageText: string, messageId: string) => {
+    speak(messageText, messageId);
+  };
+
+  // NEW: Setup voice APIs
+  useEffect(() => {
+    const setupApis = () => {
+      if (typeof window.speechSynthesis !== 'undefined') {
+        window.speechSynthesis.onvoiceschanged = () => {
+          const voices = window.speechSynthesis.getVoices();
+          const selectedVoice = voices.find(voice => voice.lang === 'hi-IN' && voice.name.includes('Google'));
+          setIndianFemaleVoice(selectedVoice || voices.find(voice => voice.lang === 'hi-IN') || null);
+        };
+      }
+      
+      if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.lang = 'hi-IN';
+        recognition.interimResults = false;
+        recognition.onstart = () => setIsListening(true);
+        recognition.onend = () => setIsListening(false);
+        recognition.onerror = (event: any) => {
+          console.error('Speech recognition error:', event.error);
+          setIsListening(false);
+        };
+        recognition.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript;
+          setInputMessage(transcript);
+          handleSendMessage(transcript);
+        };
+        recognitionRef.current = recognition;
+      }
+    };
+    setupApis();
+  }, []);
+
+  // NEW: Handle microphone click
+  const handleMicClick = () => {
+    if (!recognitionRef.current) {
+      alert("Your browser doesn't support voice recognition.");
+      return;
+    }
+    
+    if (isListening) {
+      recognitionRef.current.stop();
+    } else {
+      window.speechSynthesis.cancel();
+      setInputMessage('');
+      recognitionRef.current.start();
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -165,15 +279,15 @@ const AiChat: React.FC = () => {
     return "Thank you for your message! I'm here to help you with government jobs, exam results, admit cards, and other Sarkari-related information. You can also browse our website sections for detailed information. Is there anything specific you'd like to know?";
   };
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputMessage.trim() || isTyping) return;
+  const handleSendMessage = async (text?: string) => {
+    const messageText = text || inputMessage;
+    if (!messageText.trim() || isTyping) return;
 
-    console.log("User sending message:", inputMessage);
+    console.log("User sending message:", messageText);
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: inputMessage,
+      text: messageText,
       isUser: true,
       timestamp: new Date()
     };
@@ -184,7 +298,7 @@ const AiChat: React.FC = () => {
 
     try {
       // Call Gemini API with fresh system prompt and user message
-      const aiResponse = await callGeminiAPI(inputMessage);
+      const aiResponse = await callGeminiAPI(messageText);
       
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -194,19 +308,30 @@ const AiChat: React.FC = () => {
       };
       
       setMessages(prev => [...prev, aiMessage]);
+      
+      // NEW: Speak the AI response
+      speak(aiResponse, aiMessage.id);
     } catch (error) {
       console.error('Error in handleSendMessage:', error);
       // Fallback response
       const fallbackMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: generateFallbackResponse(inputMessage),
+        text: generateFallbackResponse(messageText),
         isUser: false,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, fallbackMessage]);
+      
+      // NEW: Speak the fallback response
+      speak(fallbackMessage.text, fallbackMessage.id);
     } finally {
       setIsTyping(false);
     }
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSendMessage();
   };
 
   const formatTime = (date: Date) => {
@@ -283,10 +408,29 @@ const AiChat: React.FC = () => {
                     }`}
                   >
                     <div className="text-sm leading-relaxed whitespace-pre-wrap">{message.text}</div>
-                    <div className={`text-xs mt-3 ${
+                    <div className={`flex items-center justify-between mt-3 ${
                       message.isUser ? 'text-indigo-100' : 'text-gray-500'
                     }`}>
-                      {formatTime(message.timestamp)}
+                      <span className="text-xs">{formatTime(message.timestamp)}</span>
+                      
+                      {/* NEW: Speak button for AI messages */}
+                      {!message.isUser && (
+                        <button
+                          onClick={() => handleSpeakMessage(message.text, message.id)}
+                          className={`ml-2 p-1.5 rounded-full transition-all duration-300 ${
+                            speakingMessageId === message.id
+                              ? 'bg-red-500 text-white animate-pulse'
+                              : 'bg-gray-200 hover:bg-gray-300 text-gray-600 hover:text-gray-800'
+                          }`}
+                          title={speakingMessageId === message.id ? "Stop speaking" : "Listen to message"}
+                        >
+                          {speakingMessageId === message.id ? (
+                            <Volume2 size={14} />
+                          ) : (
+                            <Volume2 size={14} />
+                          )}
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -313,7 +457,7 @@ const AiChat: React.FC = () => {
 
             {/* Ultra Premium Input Form */}
             <div className="p-6 border-t border-gray-200/50 bg-white/95 backdrop-blur-sm">
-              <form onSubmit={handleSendMessage} className="flex space-x-3">
+              <form onSubmit={handleFormSubmit} className="flex space-x-3">
                 <div className="flex-1 relative">
                   <input
                     type="text"
@@ -329,14 +473,28 @@ const AiChat: React.FC = () => {
                     </svg>
                   </div>
                 </div>
+                
+                {/* NEW: Voice Input Button */}
+                <button
+                  type="button"
+                  onClick={handleMicClick}
+                  className={`px-4 py-4 rounded-2xl transition-all duration-300 ${
+                    isListening 
+                      ? 'bg-red-500 text-white animate-pulse' 
+                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                  }`}
+                  disabled={isTyping}
+                  title={isListening ? "Stop listening" : "Voice input"}
+                >
+                  {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+                </button>
+                
                 <button
                   type="submit"
                   disabled={!inputMessage.trim() || isTyping}
                   className="px-6 py-4 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white rounded-2xl hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
                 >
-                  <svg className="w-5 h-5 drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                  </svg>
+                  <Send className="w-5 h-5 drop-shadow-lg" />
                 </button>
               </form>
               
